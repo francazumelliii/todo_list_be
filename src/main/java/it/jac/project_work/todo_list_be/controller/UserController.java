@@ -30,4 +30,14 @@ public class UserController {
         dto.setUserId(userId);
         return this.todoService.add(dto);
     }
+    @PatchMapping("/{id}/todo/{todoId}")
+    public TodoOutDTO update(@PathVariable("id")Long userId, @PathVariable("todoId") Long todoId, @RequestBody TodoInDTO dto){
+        dto.setUserId(userId);
+        return this.todoService.update(todoId,dto);
+    }
+
+    @DeleteMapping("/{id}/todo/{todoId}")
+    public void delete(@PathVariable("id") Long userId, @PathVariable("todoId") Long todoId){
+        this.todoService.delete(userId,todoId);
+    }
 }

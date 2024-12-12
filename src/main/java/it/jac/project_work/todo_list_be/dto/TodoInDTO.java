@@ -9,16 +9,26 @@ public class TodoInDTO {
     private Long userId;
     private LocalDate expDate;
 
+    private Long statusId;
 
     public TodoInDTO() {
     }
 
-    public TodoInDTO(String label, String description ,Long categoryId, Long userId, LocalDate expDate) {
+    public TodoInDTO(String label,Long statusId,  String description ,Long categoryId, Long userId, LocalDate expDate) {
         this.label = label;
         this.description = description;
+        this.statusId = statusId;
         this.categoryId = categoryId;
         this.userId = userId;
         this.expDate = expDate;
+    }
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 
     public String getLabel() {

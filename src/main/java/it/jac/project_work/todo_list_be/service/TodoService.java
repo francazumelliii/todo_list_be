@@ -1,6 +1,7 @@
 package it.jac.project_work.todo_list_be.service;
 
 
+import it.jac.project_work.todo_list_be.dto.StatusOutDTO;
 import it.jac.project_work.todo_list_be.dto.TodoInDTO;
 import it.jac.project_work.todo_list_be.dto.TodoOutDTO;
 import it.jac.project_work.todo_list_be.entity.Category;
@@ -19,6 +20,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,5 +81,48 @@ public class TodoService {
         }
         entity.setCategory(category);
         return TodoOutDTO.build(this.todoRepository.save(entity));
+    }
+
+    public TodoOutDTO update(Long todoId,  TodoInDTO dto){
+        if(dto.getUserId() == null || dto.getUserId() < 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required parameter: userId");
+        if(todoId == null || todoId < 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required parameter: todoId");
+
+        User user = this.userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User entity not found"));
+        Todo todo = this.todoRepository.findById(todoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo entity not found"));
+        boolean isPresent = user.getTodo().stream().anyMatch(t -> Objects.equals(t.getId(), todoId));
+        if(!isPresent) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Cannot update other user's todo list");
+
+        if(dto.getLabel() != null && !dto.getLabel().isBlank()) todo.setLabel(dto.getLabel());
+        if(dto.getDescription() != null && !dto.getDescription().isBlank()) todo.setDescription(dto.getDescription());
+        if(dto.getExpDate() != null && !dto.getExpDate().isBefore(LocalDate.now())) todo.setExpDate(dto.getExpDate());
+        if(dto.getCategoryId() != null && dto.getCategoryId() >= 0){
+            Category category = this.categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category entity not found"));
+            todo.setCategory(category);
+        }
+        if(dto.getStatusId() != null && dto.getStatusId() >= 0){
+            Status status = this.statusRepository.findById(dto.getStatusId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Status entity not found"));
+            todo.setStatus(status);
+        }
+
+        return TodoOutDTO.build(this.todoRepository.save(todo));
+
+    }
+
+    public void delete(Long userId, Long todoId){
+        if(userId == null || userId < 0 ) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required parameter: userId");
+        if(todoId == null || todoId < 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required parameter: todoId");
+
+        User user = this.userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User entity not found"));
+        Todo todo = this.todoRepository.findById(todoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo entity not found"));
+
+        boolean isPresent = user.getTodo().stream().anyMatch(t -> Objects.equals(t.getId(), todoId));
+        if(!isPresent) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Cannot delete other user's todo list");
+        this.todoRepository.delete(todo);
     }
 }
