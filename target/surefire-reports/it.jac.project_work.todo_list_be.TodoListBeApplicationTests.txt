@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: it.jac.project_work.todo_list_be.TodoListBeApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.157 s -- in it.jac.project_work.todo_list_be.TodoListBeApplicationTests
