@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface TodoRepository extends JpaRepository<Todo, Long> {
 
-    @Query("SELECT t FROM Todo t WHERE t.user = :user AND t.status.label != 'DISABLED'")
+    @Query("SELECT t FROM Todo t WHERE t.user = :user AND t.status.label != 'DISABLED' ORDER BY t.createdAt")
     List<Todo> findAllByUser(User user);
 }
